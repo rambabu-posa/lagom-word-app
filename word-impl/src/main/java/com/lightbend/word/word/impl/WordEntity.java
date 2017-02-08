@@ -3,7 +3,6 @@ package com.lightbend.word.word.impl;
 import akka.Done;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntity;
 import org.pcollections.HashTreePMap;
-import org.pcollections.PCollection;
 
 import java.util.Optional;
 
@@ -17,7 +16,7 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
         BehaviorBuilder b = newBehaviorBuilder(initState);
 
         b.setCommandHandler(WordCommand.Process.class, (cmd, ctx) ->
-                ctx.thenPersist(new WordEvent.Init(cmd.getWord()), evt ->
+                ctx.thenPersist(new WordEvent.Init(cmd.getUid(), cmd.getWord()), evt ->
                         ctx.reply(Done.getInstance())
                 )
         );
@@ -28,6 +27,13 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
 
         b.setEventHandler(WordEvent.Translated.class, evt ->
                 state().addTranslation(evt.getLanguage(), evt.getTranslation())
+        );
+
+        b.setCommandHandler(WordCommand.AddTranslation.class, (cmd, ctx) ->
+            ctx.thenPersist(new WordEvent.Translated(cmd.getTranslation(), cmd.getLanguage()), evt -> {
+                System.out.println("" + evt);
+                ctx.reply(Done.getInstance());
+            })
         );
 
         return b.build();
