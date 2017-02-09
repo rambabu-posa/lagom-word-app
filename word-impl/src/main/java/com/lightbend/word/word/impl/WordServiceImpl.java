@@ -6,18 +6,12 @@ import akka.japi.Pair;
 import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.inject.Inject;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
 import com.lightbend.lagom.javadsl.persistence.*;
 import com.lightbend.word.word.api.WordService;
-import lombok.Value;
-import org.pcollections.HashTreePMap;
-import org.pcollections.PMap;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public class WordServiceImpl implements WordService {
     private final PersistentEntityRegistry persistentEntityRegistry;
@@ -27,8 +21,8 @@ public class WordServiceImpl implements WordService {
         this.persistentEntityRegistry = persistentEntityRegistry;
         persistentEntityRegistry.register(WordEntity.class);
 
-        Source<Pair<WordEvent.ProcessStarted, Offset>, NotUsed> source = persistentEntityRegistry.eventStream(WordEvent.WORD_EVENT_TAG, Offset.NONE)
-                .filter(e -> e.first() instanceof WordEvent.ProcessStarted).map(p -> Pair.create((WordEvent.ProcessStarted) p.first(), p.second()));
+        Source<Pair<WordEvent.TranslationStarted, Offset>, NotUsed> source = persistentEntityRegistry.eventStream(WordEvent.WORD_EVENT_TAG, Offset.NONE)
+                .filter(e -> e.first() instanceof WordEvent.TranslationStarted).map(p -> Pair.create((WordEvent.TranslationStarted) p.first(), p.second()));
 
         ActorMaterializer mat = ActorMaterializer.create(system);
 

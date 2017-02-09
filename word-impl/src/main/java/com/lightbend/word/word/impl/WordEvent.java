@@ -34,7 +34,7 @@ public interface WordEvent extends AggregateEvent<WordEvent>, Jsonable {
 
     @JsonDeserialize
     @Value
-    class ProcessStarted implements WordEvent {
+    class TranslationStarted implements WordEvent {
         String uid;
         String word;
     }

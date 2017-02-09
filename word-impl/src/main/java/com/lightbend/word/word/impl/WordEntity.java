@@ -1,6 +1,7 @@
 package com.lightbend.word.word.impl;
 
 import akka.Done;
+import com.google.common.collect.Lists;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntity;
 import org.pcollections.HashTreePMap;
 
@@ -16,13 +17,13 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
         BehaviorBuilder b = newBehaviorBuilder(initState);
 
         b.setCommandHandler(WordCommand.Process.class, (cmd, ctx) ->
-                ctx.thenPersist(new WordEvent.ProcessStarted(entityId(), cmd.getWord()), evt ->
+                ctx.thenPersist(new WordEvent.TranslationStarted(entityId(), cmd.getWord()), evt ->
                         ctx.reply(Done.getInstance())
                 )
         );
 
-        b.setEventHandler(WordEvent.ProcessStarted.class, evt ->
-                new WordState(evt.getWord(), HashTreePMap.empty(), 0)
+        b.setEventHandler(WordEvent.TranslationStarted.class, evt ->
+                new WordState(evt.getWord(), HashTreePMap.empty(), state().getRetries() + 1)
         );
 
         b.setCommandHandler(WordCommand.AddTranslation.class, (cmd, ctx) ->
@@ -35,14 +36,24 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
                 state().addTranslation(evt.getLanguage(), evt.getTranslation())
         );
 
-        b.setCommandHandler(WordCommand.NoTranslation.class, (cmd, ctx) ->
-            ctx.thenPersist(new WordEvent.TranslationFailure(entityId(), state().getWord(), cmd.getLanguage(), cmd.getReason()), evt -> {
-                System.out.println("" + evt);
-                ctx.reply(Done.getInstance());
-            })
-        );
+        b.setCommandHandler(WordCommand.NoTranslation.class, (cmd, ctx) -> {
+            WordEvent.TranslationFailure translationFailure = new WordEvent.TranslationFailure(entityId(), state().getWord(), cmd.getLanguage(), cmd.getReason());
+            WordEvent.TranslationStarted retry = new WordEvent.TranslationStarted(entityId(), state().getWord());
+            WordState st = state();
+            if (state().getRetries() < 5) {
+                return ctx.thenPersist(retry, evt -> {
+                    System.out.println("" + evt + "\n > " + st + "\n > RETRY!");
+                    ctx.reply(Done.getInstance());
+                });
+            } else {
+                return ctx.thenPersist(translationFailure, evt -> {
+                    System.out.println("" + evt + "\n > " + st + "\n > NO MORE RETRIES!");
+                    ctx.reply(Done.getInstance());
+                });
+            }
+        });
         b.setEventHandler(WordEvent.TranslationFailure.class, evt ->
-                state().builder().retries(state().getRetries() + 1).build()
+                state()
         );
 
         return b.build();
