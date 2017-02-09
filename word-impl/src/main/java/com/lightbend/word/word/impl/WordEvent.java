@@ -26,7 +26,7 @@ public interface WordEvent extends AggregateEvent<WordEvent>, Jsonable {
 
     @JsonDeserialize
     @Value
-    class Init implements WordEvent {
+    class ProcessStarted implements WordEvent {
         String uid;
         String word;
     }
