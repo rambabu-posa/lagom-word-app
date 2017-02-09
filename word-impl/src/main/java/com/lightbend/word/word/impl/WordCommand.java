@@ -33,4 +33,11 @@ public interface WordCommand extends Jsonable {
         String language;
         String translation;
     }
+
+    @JsonDeserialize
+    @Value
+    class NoTranslation implements WordCommand, CompressedJsonable, PersistentEntity.ReplyType<Done> {
+        String language;
+        String reason;
+    }
 }

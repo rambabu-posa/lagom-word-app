@@ -13,6 +13,7 @@ import org.pcollections.PMap;
 final public class WordState {
     String word;
     PMap<String, String> translations;
+    int retries;
 
     public WordState addTranslation(String language, String translation) {
         return builder().translations(getTranslations().plus(language, translation)).build();

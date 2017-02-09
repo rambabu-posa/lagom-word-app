@@ -11,7 +11,7 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
     @Override
     public Behavior initialBehavior(Optional<WordState> snapshotState) {
 
-        WordState initState = new WordState("", HashTreePMap.empty());
+        WordState initState = new WordState("", HashTreePMap.empty(), 0);
 
         BehaviorBuilder b = newBehaviorBuilder(initState);
 
@@ -22,11 +22,7 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
         );
 
         b.setEventHandler(WordEvent.ProcessStarted.class, evt ->
-                new WordState(evt.getWord(), HashTreePMap.empty())
-        );
-
-        b.setEventHandler(WordEvent.Translated.class, evt ->
-                state().addTranslation(evt.getLanguage(), evt.getTranslation())
+                new WordState(evt.getWord(), HashTreePMap.empty(), 0)
         );
 
         b.setCommandHandler(WordCommand.AddTranslation.class, (cmd, ctx) ->
@@ -34,6 +30,19 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
                 System.out.println("" + evt);
                 ctx.reply(Done.getInstance());
             })
+        );
+        b.setEventHandler(WordEvent.Translated.class, evt ->
+                state().addTranslation(evt.getLanguage(), evt.getTranslation())
+        );
+
+        b.setCommandHandler(WordCommand.NoTranslation.class, (cmd, ctx) ->
+            ctx.thenPersist(new WordEvent.TranslationFailure(entityId(), state().getWord(), cmd.getLanguage(), cmd.getReason()), evt -> {
+                System.out.println("" + evt);
+                ctx.reply(Done.getInstance());
+            })
+        );
+        b.setEventHandler(WordEvent.TranslationFailure.class, evt ->
+                state().builder().retries(state().getRetries() + 1).build()
         );
 
         return b.build();

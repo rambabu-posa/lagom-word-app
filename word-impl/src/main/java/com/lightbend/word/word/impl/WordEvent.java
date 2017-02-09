@@ -16,12 +16,20 @@ public interface WordEvent extends AggregateEvent<WordEvent>, Jsonable {
         return WORD_EVENT_TAG;
     }
 
-    @SuppressWarnings("serial")
     @JsonDeserialize
     @Value
     class Translated implements WordEvent {
         String translation;
         String language;
+    }
+
+    @JsonDeserialize
+    @Value
+    class TranslationFailure implements WordEvent {
+        String uid;
+        String word;
+        String language;
+        String reason;
     }
 
     @JsonDeserialize
