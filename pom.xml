@@ -9,12 +9,6 @@
     <modules>
         <module>word-api</module>
         <module>word-impl</module>
-        <module>hello-api</module>
-        <module>hello-impl</module>
-        <module>stream-api</module>
-        <module>stream-impl</module>
-        <module>integration-tests</module>
-        <module>cassandra-config</module>
     </modules>
 
     <build>

@@ -37,15 +37,15 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
         );
 
         b.setCommandHandler(WordCommand.NoTranslation.class, (cmd, ctx) -> {
-            WordEvent.TranslationFailure translationFailure = new WordEvent.TranslationFailure(entityId(), state().getWord(), cmd.getLanguage(), cmd.getReason());
-            WordEvent.TranslationStarted retry = new WordEvent.TranslationStarted(entityId(), state().getWord());
             WordState st = state();
             if (state().getRetries() < 5) {
+                WordEvent.TranslationStarted retry = new WordEvent.TranslationStarted(entityId(), state().getWord());
                 return ctx.thenPersist(retry, evt -> {
                     System.out.println("" + evt + "\n > " + st + "\n > RETRY!");
                     ctx.reply(Done.getInstance());
                 });
             } else {
+                WordEvent.TranslationFailure translationFailure = new WordEvent.TranslationFailure(entityId(), state().getWord(), cmd.getLanguage(), cmd.getReason());
                 return ctx.thenPersist(translationFailure, evt -> {
                     System.out.println("" + evt + "\n > " + st + "\n > NO MORE RETRIES!");
                     ctx.reply(Done.getInstance());
