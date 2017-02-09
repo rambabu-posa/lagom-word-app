@@ -22,7 +22,6 @@ public interface WordCommand extends Jsonable {
     @JsonDeserialize
     @Value
     class Process implements WordCommand, CompressedJsonable, PersistentEntity.ReplyType<Done> {
-        String uid;
         String word;
     }
 

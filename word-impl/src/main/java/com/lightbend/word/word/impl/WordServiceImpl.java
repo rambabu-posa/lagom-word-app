@@ -12,6 +12,8 @@ import com.lightbend.lagom.javadsl.api.ServiceCall;
 import com.lightbend.lagom.javadsl.persistence.*;
 import com.lightbend.word.word.api.WordService;
 import lombok.Value;
+import org.pcollections.HashTreePMap;
+import org.pcollections.PMap;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -34,26 +36,17 @@ public class WordServiceImpl implements WordService {
 
             PersistentEntityRef<WordCommand> ref = persistentEntityRegistry.refFor(WordEntity.class, pair.first().getUid());
 
-            return translate(pair.first().getWord()).thenCompose(r -> {
+            return Translator.translate(pair.first().getWord()).thenCompose(r -> {
                 if (r instanceof TranslationResult.Success) {
-                    return ref.ask(new WordCommand.AddTranslation("HashCode", ((TranslationResult.Success) r).getTranslation()));
+                    return ref.ask(new WordCommand.AddTranslation("Spanish", ((TranslationResult.Success) r).getTranslation()));
                 } else {
-                    return ref.ask(new WordCommand.NoTranslation("HashCode", ((TranslationResult.Failure) r).getReason()));
+                    return ref.ask(new WordCommand.NoTranslation("Spanish", ((TranslationResult.Failure) r).getReason()));
                 }
             });
 
         })
         .runWith(Sink.ignore(), mat);
 
-    }
-
-    private static CompletionStage<TranslationResult> translate(String word) {
-        // it could be some service call
-        if (Math.random() < 0.8) {
-            return CompletableFuture.completedFuture(new TranslationResult.Success("T:" + word.hashCode()));
-        } else {
-            return CompletableFuture.completedFuture(new TranslationResult.Failure("No translation" ));
-        }
     }
 
     @Override
@@ -63,7 +56,7 @@ public class WordServiceImpl implements WordService {
 
             PersistentEntityRef<WordCommand> ref = persistentEntityRegistry.refFor(WordEntity.class, id);
 
-            return ref.ask(new WordCommand.Process(id, word)).thenApply(done -> id);
+            return ref.ask(new WordCommand.Process(word)).thenApply(done -> id);
         };
     }
 

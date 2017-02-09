@@ -16,7 +16,7 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
         BehaviorBuilder b = newBehaviorBuilder(initState);
 
         b.setCommandHandler(WordCommand.Process.class, (cmd, ctx) ->
-                ctx.thenPersist(new WordEvent.ProcessStarted(cmd.getUid(), cmd.getWord()), evt ->
+                ctx.thenPersist(new WordEvent.ProcessStarted(entityId(), cmd.getWord()), evt ->
                         ctx.reply(Done.getInstance())
                 )
         );
