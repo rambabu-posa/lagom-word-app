@@ -55,6 +55,15 @@ public class WordServiceImpl implements WordService {
     }
 
 
+    @Override
+    public ServiceCall<NotUsed, String> getState(String id) {
+        return nu -> {
+            PersistentEntityRef<WordCommand> ref = persistentEntityRegistry.refFor(WordEntity.class, id);
 
+            return ref.ask(new WordCommand.GetState()).thenApply(st ->
+                    st.toString()
+            );
 
+        };
+    }
 }

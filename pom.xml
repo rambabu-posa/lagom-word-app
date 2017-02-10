@@ -14,6 +14,14 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.lightbend.lagom</groupId>
+                <artifactId>lagom-maven-plugin</artifactId>
+                <version>${lagom.version}</version>
+                <configuration>
+                    <cassandraCleanOnStart>false</cassandraCleanOnStart>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
             </plugin>
@@ -85,6 +93,11 @@
                 <artifactId>lombok</artifactId>
                 <version>1.16.12</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.akka</groupId>
+                <artifactId>akka-cluster-tools_2.11</artifactId>
+                <version>2.4.16</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

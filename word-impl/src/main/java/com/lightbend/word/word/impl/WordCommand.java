@@ -39,4 +39,10 @@ public interface WordCommand extends Jsonable {
         String language;
         String reason;
     }
+
+    @JsonDeserialize
+    @Value
+    class GetState implements WordCommand, CompressedJsonable, PersistentEntity.ReplyType<WordState> {
+
+    }
 }

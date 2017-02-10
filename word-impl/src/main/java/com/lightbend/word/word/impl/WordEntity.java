@@ -56,6 +56,10 @@ public class WordEntity extends PersistentEntity<WordCommand, WordEvent, WordSta
                 state()
         );
 
+        b.setReadOnlyCommandHandler(WordCommand.GetState.class, (cmd, ctx) -> {
+            ctx.reply(state());
+        });
+
         return b.build();
     }
 }

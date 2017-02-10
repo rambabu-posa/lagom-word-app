@@ -17,11 +17,14 @@ public interface WordService extends Service {
 
   ServiceCall<String, String> process();
 
+  ServiceCall<NotUsed, String> getState(String id);
+
   @Override
   default Descriptor descriptor() {
     // @formatter:off
     return named("word").withCalls(
-        pathCall("/api/word",  this::process)
+        pathCall("/api/word", this::process),
+        pathCall("/api/word/state/:id", this::getState)
       ).withAutoAcl(true);
     // @formatter:on
   }
