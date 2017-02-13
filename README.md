@@ -16,7 +16,13 @@ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic word-events --f
 ```
 
 Sending words to service via Kafka topic (kafka_2.11-0.9.0.1): 
- 
 ```
 bin/kafka-console-producer.sh --broker-list localhost:9092 --topic incoming-words
+```
+
+Cassandra:
+```
+./cqlsh localhost 4000
+
+select writer_uuid, blobAsText(event) from messages where tag1 = 'com.lightbend.word.word.impl.WordEvent' allow filtering;
 ```
