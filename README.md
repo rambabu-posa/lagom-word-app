@@ -1,5 +1,5 @@
 
-![Schema](https://github.com/ygree/lagom-word-app/schema.png)
+![Schema](https://github.com/ygree/lagom-word-app/blob/master/schema.png)
 
 
 Post Word to translate:
