@@ -24,5 +24,7 @@ Cassandra:
 ```
 ./cqlsh localhost 4000
 
+use word_impl;
+
 select writer_uuid, blobAsText(event) from messages where tag1 = 'com.lightbend.word.word.impl.WordEvent' allow filtering;
 ```
