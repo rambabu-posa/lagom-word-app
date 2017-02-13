@@ -84,6 +84,16 @@
                 <version>${lagom.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.lightbend.lagom</groupId>
+                <artifactId>lagom-javadsl-broker_2.11</artifactId>
+                <version>${lagom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lightbend.lagom</groupId>
+                <artifactId>lagom-javadsl-kafka-broker_2.11</artifactId>
+                <version>${lagom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.typesafe.conductr</groupId>
                 <artifactId>${conductr.lib.name}</artifactId>
                 <version>1.4.7</version>

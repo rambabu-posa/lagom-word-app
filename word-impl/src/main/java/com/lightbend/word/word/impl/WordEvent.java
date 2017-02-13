@@ -2,6 +2,7 @@ package com.lightbend.word.word.impl;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.lightbend.lagom.javadsl.persistence.AggregateEvent;
+import com.lightbend.lagom.javadsl.persistence.AggregateEventShards;
 import com.lightbend.lagom.javadsl.persistence.AggregateEventTag;
 import com.lightbend.lagom.serialization.Jsonable;
 
@@ -9,6 +10,8 @@ import lombok.Value;
 
 public interface WordEvent extends AggregateEvent<WordEvent>, Jsonable {
 
+    int NUM_SHARDS = 4;
+//    AggregateEventShards<WordEvent> WORD_EVENT_TAG = AggregateEventTag.sharded(WordEvent.class, NUM_SHARDS);
     AggregateEventTag<WordEvent> WORD_EVENT_TAG = AggregateEventTag.of(WordEvent.class);
 
     @Override
