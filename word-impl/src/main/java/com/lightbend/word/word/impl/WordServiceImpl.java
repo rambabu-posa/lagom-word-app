@@ -5,6 +5,7 @@ import akka.NotUsed;
 import akka.actor.ActorSystem;
 import akka.japi.Pair;
 import akka.stream.ActorMaterializer;
+import akka.stream.ThrottleMode;
 import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
@@ -16,9 +17,11 @@ import com.lightbend.lagom.javadsl.persistence.*;
 import com.lightbend.word.word.api.PostService;
 import com.lightbend.word.word.api.WordService;
 import org.pcollections.TreePVector;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.UUID;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 
 public class WordServiceImpl implements WordService {
     private final PersistentEntityRegistry registry;
@@ -33,7 +36,9 @@ public class WordServiceImpl implements WordService {
 
         ActorMaterializer mat = ActorMaterializer.create(system);
 
-        source.mapAsync(1, pair -> {
+        source
+//            .throttle(1, FiniteDuration.apply(10, TimeUnit.SECONDS), 0, ThrottleMode.shaping())
+            .mapAsync(1, pair -> {
 
             PersistentEntityRef<WordCommand> ref = registry.refFor(WordEntity.class, pair.first().getUid());
 
@@ -86,10 +91,8 @@ public class WordServiceImpl implements WordService {
     public Topic<String> wordEvents() {
         return TopicProducer.taggedStreamWithOffset(TreePVector.singleton(WordEvent.WORD_EVENT_TAG),
                 (tag, offset) -> registry.eventStream(tag, offset)
-                        .map(eventAndOffset -> {
-                            System.out.println("eventAndOffset: " + eventAndOffset);
-                            return Pair.create(eventAndOffset.first().toString(), eventAndOffset.second());
-                        }
+                        .map(eventAndOffset ->
+                            Pair.create(eventAndOffset.first().toString(), eventAndOffset.second())
                 ));
     }
 }
