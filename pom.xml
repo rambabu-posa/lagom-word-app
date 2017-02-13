@@ -7,6 +7,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>post-api</module>
         <module>word-api</module>
         <module>word-impl</module>
     </modules>

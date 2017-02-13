@@ -1,9 +1,11 @@
 package com.lightbend.word.word.impl;
 
+import akka.Done;
 import akka.NotUsed;
 import akka.actor.ActorSystem;
 import akka.japi.Pair;
 import akka.stream.ActorMaterializer;
+import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import com.google.inject.Inject;
@@ -11,16 +13,18 @@ import com.lightbend.lagom.javadsl.api.ServiceCall;
 import com.lightbend.lagom.javadsl.api.broker.Topic;
 import com.lightbend.lagom.javadsl.broker.TopicProducer;
 import com.lightbend.lagom.javadsl.persistence.*;
+import com.lightbend.word.word.api.PostService;
 import com.lightbend.word.word.api.WordService;
 import org.pcollections.TreePVector;
 
 import java.util.UUID;
+import java.util.concurrent.CompletionStage;
 
 public class WordServiceImpl implements WordService {
     private final PersistentEntityRegistry registry;
 
     @Inject
-    public WordServiceImpl(PersistentEntityRegistry registry, ActorSystem system) {
+    public WordServiceImpl(PersistentEntityRegistry registry, PostService postService, ActorSystem system) {
         this.registry = registry;
         registry.register(WordEntity.class);
 
@@ -44,19 +48,27 @@ public class WordServiceImpl implements WordService {
         })
         .runWith(Sink.ignore(), mat);
 
+        postService.incomingWords()
+                .subscribe()
+                .atLeastOnce(
+                    Flow.of(String.class)
+                        .mapAsync(1, this::postWord)
+                        .map(w -> Done.getInstance())
+                );
+    }
+
+    private CompletionStage<String> postWord(String word) {
+        String id = UUID.randomUUID().toString();
+
+        PersistentEntityRef<WordCommand> ref = registry.refFor(WordEntity.class, id);
+
+        return ref.ask(new WordCommand.Process(word)).thenApply(done -> id);
     }
 
     @Override
     public ServiceCall<String, String> process() {
-        return word -> {
-            String id = UUID.randomUUID().toString();
-
-            PersistentEntityRef<WordCommand> ref = registry.refFor(WordEntity.class, id);
-
-            return ref.ask(new WordCommand.Process(word)).thenApply(done -> id);
-        };
+        return this::postWord;
     }
-
 
     @Override
     public ServiceCall<NotUsed, String> getState(String id) {
