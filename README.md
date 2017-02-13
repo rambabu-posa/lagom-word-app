@@ -1,4 +1,6 @@
 
+![Schema](https://github.com/ygree/lagom-word-app/schema.png)
+
 
 Post Word to translate:
 ```
